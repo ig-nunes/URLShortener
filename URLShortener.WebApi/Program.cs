@@ -1,4 +1,7 @@
 
+using Microsoft.EntityFrameworkCore;
+using URLShortener.Dados;
+
 namespace URLShortener.WebApi
 {
     public class Program
@@ -8,6 +11,11 @@ namespace URLShortener.WebApi
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+
+            builder.Services.AddDbContext<UrlShortenerContext>(options =>
+            {
+                options.UseSqlite(builder.Configuration.GetConnectionString("UrlShortenerApi"));
+            });
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
