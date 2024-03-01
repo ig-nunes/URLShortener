@@ -1,0 +1,6 @@
+@URLShortener.WebApi_HostAddress = http://localhost:5048
+
+GET {{URLShortener.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
