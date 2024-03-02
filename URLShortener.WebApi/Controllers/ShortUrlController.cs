@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using URLShortener.Dados;
+using URLShortener.Dados.CustomExceptions;
 using URLShortener.Dados.Models;
 using URLShortener.WebApi.RequestModels;
 using URLShortener.WebApi.ResponseModels;
@@ -30,16 +31,24 @@ namespace URLShortener.WebApi.Controllers
             var url = await _repository.Get(urlRequest);
             if (url == null)
             {
-                return BadRequest("URL encurtada inválida");
+                throw new InvalidUrlException("URL encurtada inválida", 400);
             }
 
             if (url.IsExpired)
             {
-                return BadRequest("URL encurtada expirada");
+                throw new InvalidUrlException("URL encurtada expirada", 400);
+            }
+
+            var httpClient = new HttpClient();
+            var response = await httpClient.GetAsync(url.LUrl);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new InvalidUrlException($"URL original retornou o código de status {response.StatusCode}", (int) response.StatusCode);
             }
 
             return Redirect(url.LUrl);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] UrlRequest request)
@@ -66,7 +75,7 @@ namespace URLShortener.WebApi.Controllers
             return Ok(new UrlResponse
             {
                 Id = url.Id,
-                ShortUrl = "http://localhost:5048/ShortUrl" + url.SUrl,
+                ShortUrl = "http://localhost:5048/ShortUrl/" + url.SUrl,
                 ExpirationDate = url.TimeRemainingInSeconds()
             });
         }
