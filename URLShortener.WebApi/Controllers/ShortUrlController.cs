@@ -20,16 +20,33 @@ namespace URLShortener.WebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUrls()
         {
-            var urls = await _repository.GetAllUrlsAsync();
+            var urls = await _repository.GetAll();
             return Ok(urls);
+        }
+
+        [HttpGet("{urlRequest}")]
+        public async Task<IActionResult> GetUrl([FromRoute] string urlRequest)
+        {
+            var url = await _repository.Get(urlRequest);
+            if (url == null)
+            {
+                return BadRequest("URL encurtada inválida");
+            }
+
+            if (url.IsExpired)
+            {
+                return BadRequest("URL encurtada expirada");
+            }
+
+            return Redirect(url.LUrl);
         }
 
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] UrlRequest request)
         {
-            if (!Uri.TryCreate(request.Url , UriKind.Absolute, out var inputUrl))
+            if (!Uri.TryCreate(request.Url, UriKind.Absolute, out var inputUrl))
             {
-                Results.BadRequest("invalid url has been profifafed");
+                return BadRequest("Foi passado um URL inválido");
             }
 
             var random = new Random();
@@ -41,17 +58,24 @@ namespace URLShortener.WebApi.Controllers
                 LUrl = request.Url,
                 SUrl = randomStr,
                 CreationDate = DateTime.Now,
-                ExpirationPeriod = 300
+                ExpirationPeriod = 3000
             };
 
             await _repository.Post(url);
-            
+
             return Ok(new UrlResponse
             {
                 Id = url.Id,
-                ShortUrl = url.SUrl,
+                ShortUrl = "http://localhost:5048/ShortUrl" + url.SUrl,
                 ExpirationDate = url.TimeRemainingInSeconds()
             });
+        }
+
+        [HttpDelete("{url}")]
+        public async Task<IActionResult> DeleteUrl(string url)
+        {
+            await _repository.Delete(url);
+            return Ok($"URL '{url}' Deletado com sucesso");
         }
     }
 }
