@@ -1,4 +1,8 @@
 
+using Microsoft.EntityFrameworkCore;
+using URLShortener.Dados;
+using URLShortener.WebApi.Filters;
+
 namespace URLShortener.WebApi
 {
     public class Program
@@ -9,7 +13,30 @@ namespace URLShortener.WebApi
 
             // Add services to the container.
 
-            builder.Services.AddControllers();
+            builder.Services.AddDbContext<UrlShortenerContext>(options =>
+            {
+                options.UseSqlite(builder.Configuration.GetConnectionString("UrlShortenerApi"));
+            });
+
+            builder.Services.AddScoped<IRepository, UrlRepositorioEF>();
+
+
+            builder.Services.AddControllers(options =>
+            {
+                options.Filters.Add<CustomFilterExceptionHandler>();
+            });
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAnyOrigin", builder =>
+                {
+                    builder.AllowAnyOrigin()
+                           .AllowAnyMethod()
+                           .AllowAnyHeader();
+                });
+            });
+
+            
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -22,6 +49,7 @@ namespace URLShortener.WebApi
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+            app.UseCors("AllowAnyOrigin");
 
             app.UseAuthorization();
 
