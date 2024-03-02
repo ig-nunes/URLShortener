@@ -11,6 +11,7 @@ namespace URLShortener.Dados
     {
         Task<Url?> Post(Url url);
         Task<Url?> Get(string url);
-        Task<List<Url>> GetAllUrlsAsync();
+        Task<List<Url>> GetAll();
+        Task Delete(string url);
     }
 }

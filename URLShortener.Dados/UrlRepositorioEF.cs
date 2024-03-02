@@ -17,13 +17,26 @@ namespace URLShortener.Dados
             _context = context;
         }
 
+        public async Task Delete(string urlRequest)
+        {
+            var url = await _context.Urls.FirstOrDefaultAsync(u => u.SUrl == urlRequest);
+            if (url != null)
+            {   
+                _context.Urls.Remove(url);
+                await _context.SaveChangesAsync();
+            } else
+            {
+                throw new InvalidOperationException("A url passada não está salva no banco de dados");
+            }
+        }
+
         public async Task<Url?> Get(string urlReq)
         {
-            var url = await _context.Urls.FirstOrDefaultAsync(url => url.SUrl == urlReq);
+            var url = await _context.Urls.FirstOrDefaultAsync(url => url.SUrl.ToLower() == urlReq.ToLower());
             return url;
         }
 
-        public async Task<List<Url>> GetAllUrlsAsync()
+        public async Task<List<Url>> GetAll()
         {
             return await _context.Urls.ToListAsync();
         }
