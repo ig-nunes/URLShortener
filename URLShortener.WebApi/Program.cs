@@ -17,6 +17,8 @@ namespace URLShortener.WebApi
                 options.UseSqlite(builder.Configuration.GetConnectionString("UrlShortenerApi"));
             });
 
+            builder.Services.AddScoped<IRepository, UrlRepositorioEF>();
+
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
