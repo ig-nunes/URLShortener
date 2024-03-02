@@ -15,7 +15,7 @@ namespace URLShortener.Dados
         
         }
         
-        public virtual DbSet<Url> Urls { get; set; }
+        public DbSet<Url> Urls { get; set; }
 
     }
 }
